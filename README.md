@@ -32,7 +32,7 @@ You can find those components in ./src/components/shop/home/ProductCategoryDropd
 ## Implementation Results
 
 ### Unified Filter & Search Interface
-![Filter and Search Implementation](./public/test mern filter and search.PNG)
+![Filter and Search Implementation](./public/test-mern-filter-and-search.PNG)
 
 The filter and search functionalities have been successfully combined into a single, unified interface with:
 - Two search input fields (Title and Description)
@@ -41,7 +41,7 @@ The filter and search functionalities have been successfully combined into a sin
 - Reset functionality
 
 ### Price Range Filter Implementation
-![Price Range Filter](./public/filter min max.PNG)
+![Price Range Filter](./public/filter-min-max.PNG)
 
 The price slider has been replaced with two number input fields for more precise price range filtering.
 
