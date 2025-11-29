@@ -41,11 +41,7 @@ CreateAllFolder();
 
 // Database Connection
 mongoose
-  .connect(process.env.DATABASE, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-    useCreateIndex: true,
-  })
+  .connect(process.env.DATABASE)
   .then(() =>
     console.log(
       "==============Mongodb Database Connected Successfully=============="

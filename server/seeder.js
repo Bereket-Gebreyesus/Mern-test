@@ -51,10 +51,13 @@ const destroyData = async () => {
     process.exit(1)
   }
 }
-connectDB(mongoose);
-if (process.argv[2] === '-d') {
 
-  destroyData()
-} else {
-  importData()
-}  
+// Wait for database connection before running seeder
+connectDB(mongoose);
+mongoose.connection.once('open', () => {
+  if (process.argv[2] === '-d') {
+    destroyData()
+  } else {
+    importData()
+  }
+});  

@@ -214,12 +214,204 @@ const Search = () => {
   );
 };
 
+const FilterSearch = () => {
+  const { data, dispatch } = useContext(HomeContext);
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [minPrice, setMinPrice] = useState("");
+  const [maxPrice, setMaxPrice] = useState("");
+  const [productArray, setPa] = useState(null);
+
+  useEffect(() => {
+    fetchAllProducts();
+  }, []);
+
+  const fetchAllProducts = async () => {
+    try {
+      let responseData = await getAllProduct();
+      if (responseData && responseData.Products) {
+        setPa(responseData.Products);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const filterProducts = (products) => {
+    if (!products) return [];
+    
+    return products.filter((product) => {
+      // Filter by title
+      const titleMatch = !title.trim() || 
+        product.pName.toLowerCase().includes(title.trim().toLowerCase());
+      
+      // Filter by description
+      const descriptionMatch = !description.trim() || 
+        product.pDescription.toLowerCase().includes(description.trim().toLowerCase());
+      
+      // Filter by price range
+      const minPriceValue = minPrice.trim() ? parseFloat(minPrice.trim()) : null;
+      const maxPriceValue = maxPrice.trim() ? parseFloat(maxPrice.trim()) : null;
+      
+      let priceMatch = true;
+      if (minPriceValue !== null && !isNaN(minPriceValue)) {
+        priceMatch = priceMatch && product.pPrice >= minPriceValue;
+      }
+      if (maxPriceValue !== null && !isNaN(maxPriceValue)) {
+        priceMatch = priceMatch && product.pPrice <= maxPriceValue;
+      }
+      
+      // All conditions must match (AND logic)
+      return titleMatch && descriptionMatch && priceMatch;
+    });
+  };
+
+  const handleSearch = () => {
+    if (!productArray) return;
+    
+    dispatch({ type: "loading", payload: true });
+    
+    setTimeout(() => {
+      const filteredProducts = filterProducts(productArray);
+      dispatch({ type: "setProducts", payload: filteredProducts });
+      dispatch({ type: "loading", payload: false });
+    }, 300);
+  };
+
+  const handleReset = () => {
+    setTitle("");
+    setDescription("");
+    setMinPrice("");
+    setMaxPrice("");
+    if (productArray) {
+      dispatch({ type: "setProducts", payload: productArray });
+    }
+  };
+
+  const closeFilterSearchBar = () => {
+    handleReset();
+    dispatch({ type: "filterSearchDropdown", payload: !data.filterSearchDropdown });
+  };
+
+  return (
+    <div className={`${data.filterSearchDropdown ? "" : "hidden"} my-4`}>
+      <hr />
+      <div className="w-full flex flex-col space-y-4 py-4">
+        <div className="font-medium text-lg">Filter & Search Products</div>
+        
+        {/* Search Fields */}
+        <div className="flex flex-col space-y-3">
+          <div className="flex flex-col md:flex-row md:space-x-4 space-y-3 md:space-y-0">
+            <div className="flex-1">
+              <label htmlFor="title-search" className="block text-sm font-medium mb-1">
+                Title
+              </label>
+              <input
+                id="title-search"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-700 text-black"
+                type="text"
+                placeholder="Search by product title..."
+              />
+            </div>
+            <div className="flex-1">
+              <label htmlFor="description-search" className="block text-sm font-medium mb-1">
+                Description
+              </label>
+              <input
+                id="description-search"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-700 text-black"
+                type="text"
+                placeholder="Search by product description..."
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Price Range Fields */}
+        <div className="flex flex-col space-y-3">
+          <div className="flex flex-col md:flex-row md:space-x-4 space-y-3 md:space-y-0">
+            <div className="flex-1">
+              <label htmlFor="min-price" className="block text-sm font-medium mb-1">
+                Minimum Price ($)
+              </label>
+              <input
+                id="min-price"
+                value={minPrice}
+                onChange={(e) => setMinPrice(e.target.value)}
+                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-700 text-black"
+                type="number"
+                min="0"
+                step="0.01"
+                placeholder="0.00"
+              />
+            </div>
+            <div className="flex-1">
+              <label htmlFor="max-price" className="block text-sm font-medium mb-1">
+                Maximum Price ($)
+              </label>
+              <input
+                id="max-price"
+                value={maxPrice}
+                onChange={(e) => setMaxPrice(e.target.value)}
+                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-700 text-black"
+                type="number"
+                min="0"
+                step="0.01"
+                placeholder="1000.00"
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Action Buttons */}
+        <div className="flex items-center justify-between pt-2">
+          <div className="flex space-x-3">
+            <button
+              onClick={handleSearch}
+              className="px-6 py-2 bg-yellow-700 text-white rounded-md hover:bg-yellow-800 focus:outline-none focus:ring-2 focus:ring-yellow-700 focus:ring-offset-2 transition-colors"
+            >
+              Apply Filter & Search
+            </button>
+            <button
+              onClick={handleReset}
+              className="px-6 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-colors"
+            >
+              Reset
+            </button>
+          </div>
+          <div onClick={closeFilterSearchBar} className="cursor-pointer">
+            <svg
+              className="w-8 h-8 text-gray-700 hover:bg-gray-200 rounded-full p-1"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M6 18L18 6M6 6l12 12"
+              />
+            </svg>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const ProductCategoryDropdown = (props) => {
   return (
     <Fragment>
       <CategoryList />
       <FilterList />
       <Search />
+      <FilterSearch />
     </Fragment>
   );
 };
